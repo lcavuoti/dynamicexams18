@@ -5,6 +5,7 @@ Definieren Sie für die folgende Klasse einen Konstruktor ohne Parameter:
 class Bicycle {
 }
 ```
+---
 
 
 [comment]: <> ({

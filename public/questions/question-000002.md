@@ -27,10 +27,10 @@ Vorschlag 3:
 private int state;
 private String node;
 ```
-
+---
 [comment]: <> ({
     "type": "multiplechoice", 
     "level": 1,
-    "answers": ["Pizza", "RAM", "ROM"],
+    "answers": ["Vorschlag 1", "Vorschlag 2", "Vorschlag 3"],
     "solution": [1,2]
 })

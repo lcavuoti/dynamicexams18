@@ -27,6 +27,7 @@ Vorschlag 3:
 public power() {
 }
 ```
+---
 
 [comment]: <> ({
     "type": "singlechoice",

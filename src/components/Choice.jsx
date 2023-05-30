@@ -1,121 +1,121 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import ReactMarkdown from "react-markdown";
+import {marked} from "marked";
+import {decode} from "base-64"
 
 export default function Choice(props) {
-  const [question, setQuestion] = useState({ question: "", answer: {} });
 
-  // deconstruct props
-  const { number, filename, quiz } = props;
+    // deconstruct props
+    const {quiz} = props;
 
-  const getQuestionObj = (txt) => {
-    const trigger = "[comment]: <> (";
-    let question = txt.substring(0, txt.indexOf(trigger));
-    //console.log(question);
-    let answer = txt.substring(txt.indexOf(trigger) + trigger.length);
-    answer = JSON.parse(answer.substring(0, answer.length - 2));
-    return { question, answer };
-  };
-  /*
-  useEffect(() => {
-    fetch(props.filename)
-      .then((r) => r.text())
-      .then((fileContent) => {
-        setQuestion(getQuestionObj(fileContent));
-      });
-  }, [props.filename]);
-*/
-  const AnswerComponent = (props) => {
-    const { quiz } = props;
-    const answer = quiz.id;
-    const choices = atob(quiz.choices).split(",");
+     const AnswerSingleChoiceComponent = (props) => {
+        const {quiz} = props;
+        const choices = decode(quiz.choices).split(",");
 
-    //const choices = Array(choices1);
-    //console.log(choices);
-
-    return (
-      <div>
-        {choices.map((r, i) => (
-          <React.Fragment key={i}>
-            <input type="radio" name="answer" />
-            &nbsp;
-            <label>{r}</label>
-            <br />
-          </React.Fragment>
-        ))}
-      </div>
-    );
-
-    /*   if (question) {
-      if (answer.type === "sc") {
         return (
-          <div>
-            {answer.answers.map((r, i) => (
-              <React.Fragment key={i}>
-                <input type="radio" />
-                &nbsp;
-                <label>{r}</label>
-                <br />
-              </React.Fragment>
-            ))}
-          </div>
+            <div>
+                {choices.map((r, i) => (
+                    <React.Fragment key={i}>
+                        <input type="radio" name="answer"/>
+                        &nbsp;
+                        <label>{r}</label>
+                        <br/>
+                    </React.Fragment>
+                ))}
+            </div>
         );
-      } else if (answer.type === "mc") {
-        return (
-          <div>
-            {answer.answers.map((r, i) => (
-              <React.Fragment key={i}>
-                <input type="checkbox" />
-                &nbsp;
-                <label>{r}</label>
-                <br />
-              </React.Fragment>
-            ))}
-          </div>
-        );
-      } else if (answer.type === "tl") {
-        return (
-          <div>
-            <label>Ihre Antwort:</label>
-            <br />
-            <input type="text" />
-            <br />
-          </div>
-        );
-      }
-      return <p>answers</p>;
-    } else {
-      return <p>loading...</p>;
-    }*/
-  };
 
-  const SingleChoiceChoices = (props) => {
-    const { quiz } = props;
-    // console.log(quiz);
-    if (quiz.type === "singleChoice") {
-      return (
-        <div>
-          <h1>hey</h1>
-          <p>{atob(quiz.choices)}</p>
-        </div>
-      );
-    } else {
-      return <div>hello</div>;
-    }
-  };
+    };
+    const AnswerMultipleChoiceComponent = (props) => {
+        const {quiz} = props;
+        const choices = decode(quiz.choices).split(",");
 
-  return (
-    <div className="card" style={{ marginBottom: 20 }}>
-      <div className="card-header">Frage Nr. {props.quiz.id}</div>
-      <div className="card-body">
-        <ReactMarkdown>{atob(quiz.content)}</ReactMarkdown>
-        {console.log(atob(quiz.content))}
-      </div>
-      <div className="card-footer">
-        <AnswerComponent quiz={quiz} />
-        {
-          //quiz.type === "singleChoice" ? <AnswerComponent /> : <div>hey</div>
+        return (
+            <div>
+                {choices.map((r, i) => (
+                    <React.Fragment key={i}>
+                        <input type="checkbox" name="answer"/>
+                        &nbsp;
+                        <label>{r}</label>
+                        <br/>
+                    </React.Fragment>
+                ))}
+            </div>
+        );
+
+    };
+
+    const AnswerGapTextComponent = (props) => {
+        const {quiz} = props;
+        const choices = decode(quiz.choices).split(",");
+
+        return (
+            <div>
+                {choices.map((r, i) => (
+                    <React.Fragment key={i}>
+                        <div>
+                            <label>Ihre Antwort {i + 1}:</label>
+                            <br/>
+                            <input type="text"/>
+                            <br/>
+                        </div>
+                    </React.Fragment>
+                ))}
+            </div>
+        );
+    };
+
+
+    const AnswerComponent = (props) => {
+        const {quiz} = props
+        let answerContent;
+
+        switch (quiz.type) {
+            case 'singleChoice':
+                answerContent = ( <AnswerSingleChoiceComponent quiz={quiz} /> )
+                break
+            case 'multipleChoice':
+                answerContent = ( <AnswerMultipleChoiceComponent quiz={quiz}/>)
+                break
+            case 'gapText':
+                answerContent = ( <AnswerGapTextComponent quiz={quiz}/>)
+                break
+            default:
+                answerContent = (<AnswerSingleChoiceComponent quiz={quiz}/>)
+                break
+
         }
-      </div>
-    </div>
-  );
+
+        return answerContent
+
+    }
+
+    const html = marked(decode(quiz.content));
+    const isSingleChoice = quiz.type === 'singleChoice'
+    const isGapText = quiz.type === 'gapText'
+    return (
+
+        <div className="card" style={{marginBottom: 20}}>
+            <div className="card-header">Frage Nr. {props.quiz.id}</div>
+           {/* <div className="card-body">
+                <ReactMarkdown>{decode(quiz.content)}</ReactMarkdown>
+            </div>
+            <h5> Render the decoded string using dangerouslySetInnerHTML</h5>*/}
+            <div className="card-body" dangerouslySetInnerHTML={{__html: html}}/>
+
+            <div className="card-footer">
+
+              {/*  {isSingleChoice ? (
+                    <AnswerSingleChoiceComponent quiz={quiz}/>
+                ) : (<AnswerMultipleChoiceComponent quiz={quiz}/>)}
+
+                {isGapText ? (<AnswerGapTextComponent quiz={quiz}/>
+                ) : (<AnswerGapTextComponent quiz={quiz}/>)
+
+                }*/}
+
+                <AnswerComponent quiz={quiz} />
+            </div>
+        </div>
+    );
 }
